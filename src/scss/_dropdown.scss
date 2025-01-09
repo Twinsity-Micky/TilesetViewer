@@ -1,0 +1,57 @@
+@use 'sass:math';
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-button {
+  &.selected {
+    border-left: 1px solid $dropdown-border-color;
+    border-top: 1px solid $dropdown-border-color;
+    border-right: 1px solid $dropdown-border-color;
+  }
+}
+
+.dropdown-content {
+  display: none;
+  flex-direction: column;
+  row-gap: $vgap;
+  position: absolute;
+  color: $dropdown-fore-color;
+  background-color: $dropdown-back-color;
+  border: 1px solid $dropdown-border-color;
+  z-index: 9;
+
+  input {
+    border: 1px solid $dropdown-border-color;
+  }
+
+  button {
+    border: 1px solid $dropdown-border-color;
+  }
+}
+
+.dropdown-content-row {
+  display: flex;
+  flex-direction: row;
+  column-gap: $hgap;
+  flex-wrap: nowrap;
+  align-items: center;
+  width: 100%;
+}
+
+.dropdown-content-button {
+  color: $dropdown-fore-color;
+  background-color: $dropdown-back-color;
+  border: none;
+  outline: none;
+  text-align: left;
+}
+
+.dropdown-separator {
+  height: 2px;
+  width: 100%;
+  border-top: 1px solid $shadow-color;
+  border-bottom: 1px solid $dropdown-border-color;
+}
+

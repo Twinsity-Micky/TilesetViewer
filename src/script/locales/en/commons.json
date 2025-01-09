@@ -1,0 +1,35 @@
+{
+  "GENERAL": {
+    "OK": "OK",
+    "APPLY": "Apply",
+    "CANCEL": "Cancel",
+    "CLOSE": "Close",
+    "YES": "Yes",
+    "NO": "No",
+    "HELP": "Help",
+    "INFORMATION": "Information",
+    "WARNING": "Warning",
+    "ERROR": "Error",
+    "QUESTION": "Question",
+    "PROMPT": "Input"
+  },
+  "TIP_TEXT": {
+    "HAMBURGER_DROPDOWN": "Customize and Manage Application",
+    "TOGGLE_FULLSCREEN": "Toggle Fullscreen - [F11]",
+    "TOGGLE_SIDEBAR": "Toggle Sidebar"
+  },
+  "FIND_DROPDOWN": {
+    "FIND": "Find"
+  },
+  "HAMBURGER_DROPDOWN": {
+    "LOCALE": "Language / Country",
+    "DEFAULT_PATH": "Default Working Directory...",
+    "ZOOM": "Zoom",
+    "FULLSCREEN": "Fullscreen",
+    "HELP": "Help...",
+    "ABOUT": "About..."
+  },
+  "ABOUT_DIALOG": {
+    "TITLE": "About Twinsity Tileset Viewer"
+  }
+}

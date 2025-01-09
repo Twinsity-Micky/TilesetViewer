@@ -1,0 +1,90 @@
+/* Base for label styling */
+[type='checkbox']:not(:checked),
+[type='checkbox']:checked {
+  display: none;
+}
+
+[type='checkbox']:not(:checked) + label,
+[type='checkbox']:checked + label {
+  position: relative;
+  padding-left: 1.95em;
+  padding-top: 0.15em;
+  padding-right: 1.95em;
+  padding-bottom: 0.15em;
+
+  cursor: pointer;
+}
+
+/* checkbox aspect */
+[type='checkbox']:not(:checked) + label:before,
+[type='checkbox']:checked + label:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.4em;
+  height: 1.4em;
+  color: $primary-fore-color;
+  background-color: $primary-back-color;
+  border: 1px solid $primary-border-color;
+}
+
+/* checked mark aspect */
+[type='checkbox']:not(:checked) + label:after,
+[type='checkbox']:checked + label:after {
+  content: '\2713\0020';
+  position: absolute;
+  top: 0.2em;
+  left: 0.22em;
+  font-size: 1.3em;
+  line-height: 0.8;
+  transition: all 0.2s;
+  color: $primary-fore-color;
+}
+
+/* checked mark aspect changes */
+[type='checkbox']:not(:checked) + label:after {
+  opacity: 0;
+  transform: scale(0);
+}
+
+[type='checkbox']:checked + label:after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* disabled checkbox */
+[type='checkbox']:disabled:not(:checked) + label:before,
+[type='checkbox']:disabled:checked + label:before {
+  opacity: 0.5;
+}
+
+[type='checkbox']:disabled:checked + label:after {
+  opacity: 0.5;
+}
+
+[type='checkbox']:disabled + label {
+  opacity: 0.5;
+}
+
+/* accessibility */
+[type='checkbox']:checked:focus + label:before,
+[type='checkbox']:not(:checked):focus + label:before {
+  border: 1px solid $focus-color;
+}
+
+/* Enable hover on devices with mouse pointer */
+@media (pointer: fine) {
+  /* hover style just for information */
+  [type='checkbox']:hover + label:before {
+    background-color: $hover-back-color;
+    border: 1px solid $hover-border-color;
+  }
+  [type='checkbox']:hover:not(:checked) + label:before,
+  [type='checkbox']:hover:checked + label:before {
+    color: $hover-fore-color;
+  }
+  [type='checkbox']:hover:checked + label:after {
+    color: $hover-fore-color;
+  }
+}

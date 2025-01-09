@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Twinsity-Tileset-Viewer</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable = no"
+    />
+    <link rel="shortcut icon" type="image/x-icon" href="../images/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="../scss/index.scss" />
+  </head>
+  <body class="no-transition">
+
+    <!-- Toolbar -->
+    <div class="toolbar" id="main_toolbar">
+      <button class="toolbar-text-button" id="garden_sample_button">Garden</button> 
+      <button class="toolbar-text-button" id="bridge_sample_button">Bridge</button> 
+      <button class="toolbar-text-button" id="factory_sample_button">Factory</button> 
+      <button class="toolbar-text-button" id="street_sample_button">Street</button> 
+      <div class="toolbar-separator"></div>
+      <div class="toolbar-text">Localhost:</div>
+      <button class="toolbar-text-button" id="local_garden_sample_button">Garden</button> 
+      <button class="toolbar-text-button" id="local_bridge_sample_button">Bridge</button> 
+      <button class="toolbar-text-button" id="local_factory_sample_button">Factory</button> 
+      <button class="toolbar-text-button" id="local_metashape_container_sample_button">Metashape Container</button> 
+      <button class="toolbar-text-button" id="local_pix4d_container_sample_button">Pix4D Container</button> 
+      <button class="toolbar-text-button" id="local_realitycapture_container_sample_button">Reality-Capture Container</button> 
+
+      <div class="dropdown" id="hamburger_dropdown">
+        <button class="toolbar-button dropdown-button" id="hamburger_dropdown_button"><sup>&#9776;</sup></button>
+        <div class="dropdown-content" id="hamburger_dropdown_content">
+
+          <div class="dropdown-content-row" id="hamburger_dropdown_locale_row">
+            <div class="dropdown" id="locale_dropdown">
+              <button class="dropdown-content-button dropdown-button" id="locale_dropdown_button">Language/Country</button>
+              <div class="dropdown-content" id="locale_dropdown_content">
+                <div class="dropdown-content-row" id="locale_dropdown_en_gb_row">
+                  <button class="dropdown-content-button" id="locale_en_gb_button">English / Great Britain</button>
+                </div>
+                <div class="dropdown-content-row" id="locale_dropdown_de_de_row">
+                  <button class="dropdown-content-button" id="locale_de_de_button">Deutsch / Deutschland</button>
+                </div>
+                <div class="dropdown-content-row" id="locale_dropdown_browser_default_row">
+                  <button class="dropdown-content-button" id="locale_browser_default_button">Browser default</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dropdown-separator"></div>
+
+          <div class="dropdown-content-row" id="hamburger_dropdown_fullscreen_row">
+            <button class="dropdown-content-button" id="toggle_fullscreen_button">Fullscreen</button>
+          </div>
+
+          <div class="dropdown-separator"></div>
+
+          <div class="dropdown-content-row" id="hamburger_dropdown_help_row">
+            <button class="dropdown-content-button" id="help_button">Help</button>
+          </div>
+          <div class="dropdown-content-row" id="hamburger_dropdown_about_row">
+            <button class="dropdown-content-button" id="about_button">About</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="main_content">
+      
+      <!-- Sidebar -->
+      <div class="sidebar" id="main_sidebar">
+        <button class="sidebar-button" id="sidebar_toggle_button"></button>
+      </div>
+      <div class="sidebar-panel" id="main_sidebar_panel"> 
+        <div class="titlebar" id="main_sidebar_panel_titlebar">
+          Options
+        </div>
+        <div class="sidebar-panel-content" id="main_sidebar_panel_content">
+          <div class="sidebar-panel-content-row">
+            <input type="checkbox" id="show_grid"/>
+            <label for="show_grid" tabindex="0">Show&nbsp;Grid</label>
+          </div>
+          <div class="sidebar-panel-content-row">
+            <input type="checkbox" id="show_axes"/>
+            <label for="show_axes" tabindex="0">Show&nbsp;Axes</label>
+          </div>
+          <div class="sidebar-panel-content-row">
+            <input type="checkbox" id="show_bounding_boxes"/>
+            <label for="show_bounding_boxes" tabindex="0">Show&nbsp;BoundingBoxes</label>
+          </div>
+          <div class="sidebar-panel-content-separator"></div>
+          <div class="sidebar-panel-content-row">
+            <label class="sidebar-panel-content-label" for="screen_space_error" tabindex="0">ScreenSpaceError</label>
+            <input type="number" min="0.1" max="100" step="0.1" id="screen_space_error"/>
+          </div>
+          <div class="sidebar-panel-content-separator"></div>
+          <div class="sidebar-panel-content-row">
+            <label class="sidebar-panel-content-label" for="maximum_memory_usage" tabindex="0">MaximumMemoryUsage</label>
+            <input type="number" min="64" max="8192" step="4" id="maximum_memory_usage"/>
+            <label tabindex="0">MB</label>
+          </div>
+          <div class="sidebar-panel-content-row">
+            <label class="sidebar-panel-content-label" for="maximum_tiles_selected" tabindex="0">MaximumTilesSelected</label>
+            <input type="number" min="64" max="8192" step="4" id="maximum_tiles_selected"/>
+          </div>
+          <div class="sidebar-panel-content-row">
+            <label tabindex="0">Changing the values above needs a reload</label>
+            <button id="reload_model">Reload Model</button>
+          </div>
+          <div class="sidebar-panel-content-separator"></div>
+          <div class="sidebar-panel-content-row">
+            <textarea id="sidebar_tileset_stats" />
+          </div>
+          <div class="sidebar-panel-content-separator"></div>
+        </div>
+      </div>
+      <div id="main_canvas_container">
+        <canvas id="webgl_canvas"></canvas>
+      </div>
+    </div>
+    <script type="module" src="../script/index.ts"></script>
+  </body>
+</html>

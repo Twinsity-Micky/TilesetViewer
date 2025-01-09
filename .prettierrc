@@ -1,0 +1,19 @@
+{
+  "useTabs": false,
+  "tabWidth": 2,
+  "endOfLine": "lf",
+  "printWidth": 120,
+  "singleQuote": true,
+  "trailingComma": "es5",
+
+  "overrides": [
+    {
+      "files": "/**/*.json",
+      "options": {
+        "parser": "jsonc",
+        "singleQuote": false,
+        "quoteProps": "preserve"
+      }
+    }
+  ]
+}

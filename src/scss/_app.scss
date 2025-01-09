@@ -1,0 +1,292 @@
+@use 'sass:math';
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+::placeholder {
+  color: $input-fore-color;
+  opacity: 0.3;
+}
+
+::selection {
+  color: $accent-fore-color;
+  background: $accent-back-color;
+}
+
+html,
+body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: $primary-font;
+  font-size: $primary-font-size;
+  color: $primary-fore-color;
+  background-color: $primary-back-color;
+  // overflow: hidden;
+}
+
+div {
+  .disabled {
+    color: $disabled-fore-color;
+  }
+}
+
+button {
+  padding: $vgap $hgap;
+  color: $button-fore-color;
+  background-color: $button-back-color;
+  background-image: linear-gradient($button-back-color-light, $button-back-color-shadow);
+  border: 1px solid $button-border-color;
+  
+  &:hover {
+    &:enabled {
+      color: $hover-fore-color;
+      background-color: $hover-back-color;
+      background-image: linear-gradient($hover-back-color-light, $hover-back-color-shadow);
+
+      &.selected {
+        background-color: $button-selected-back-color;
+        background-image: none;
+      }
+
+      &:active {
+        background-color: $button-pressed-back-color;
+        background-image: none;
+      }
+    }
+  }
+
+  &:focus {
+    outline: 1px solid $focus-color;
+  }  
+
+  &.selected {
+    background-color: $button-selected-back-color;
+    background-image: none;
+  }
+
+  &:enabled {
+    &:active {
+      background-color: $button-pressed-back-color;
+      background-image: none;
+    }
+  }
+
+  &:disabled {
+    color: $disabled-fore-color;
+    background-color: $disabled-back-color;
+    background-image: none;
+    border: 1px solid $disabled-border-color;
+  }
+
+}
+
+label {
+  font-family: $primary-font;
+  font-size: $primary-font-size;
+  color: $primary-fore-color;
+  &:disabled {
+    color: $disabled-fore-color;
+  }
+  &:focus {
+    outline: 1px solid $focus-color;
+  }
+}
+
+input {
+  padding: 4px 6px;
+  font-family: $primary-font;
+  font-size: $primary-font-size;
+  color: $input-fore-color;
+  color-scheme: dark;
+  background-color: $input-back-color;
+  border: 1px solid $input-border-color;
+  &:focus {
+    outline: 1px solid $focus-color;
+  }
+  &:disabled {
+    color: $disabled-fore-color;
+    background-color: $disabled-back-color;
+  }
+}
+
+input[type=range] {
+  appearance: none;
+  width: 100%;
+	border-radius: 6px;
+	height: 12px;
+  background-color: $input-back-color;
+  border: 1px solid $input-border-color;
+  &:focus {
+    outline: none;  
+    border: 1px solid $focus-color;
+  }
+  &:hover {
+    &:enabled {
+      background-color: $hover-back-color;
+    }
+  }
+}
+
+input[type='range']::-webkit-slider-thumb {
+	appearance: none;
+	background-color: $accent-back-color;
+  border: 1px solid $accent-border-color;
+	width: 24px;
+	height: 24px;
+	border-radius: 12px;
+	cursor: pointer;
+  // &:hover {
+  //   background-color: $accent-back-color;
+  //   border: 1px solid $accent-border-color;
+  // }
+}
+
+textarea {
+  padding: 4px 6px;
+  font-family: $primary-font;
+  font-size: $primary-font-size;
+  line-height: 28px;
+  color: $input-fore-color;
+  background-color: $input-back-color;
+  border: 1px solid $input-border-color;
+  resize: none;
+  overflow: auto;
+  &:focus {
+    outline: 1px solid $focus-color;
+  }
+  &:disabled {
+    color: $disabled-fore-color;
+    background-color: $disabled-back-color;
+  }
+}
+
+select {
+  padding: 4px 6px;
+  font-family: $primary-font;
+  font-size: $primary-font-size;
+  color: $input-fore-color;
+  background-color: $input-back-color;
+  border: 1px solid $input-border-color;
+  outline: 1px solid transparent;
+  &:focus {
+    outline: 1px solid $focus-color;
+  }
+  &:disabled {
+    color: $disabled-fore-color;
+    background-color: $disabled-back-color;
+  }
+}
+
+li {
+  position: relative;
+  padding: 4px 6px;
+  font-family: $primary-font;
+  font-size: $primary-font-size;
+  color: $primary-fore-color;
+  background-color: $primary-back-color;
+  border-bottom: 1px solid transparent;
+  &.selected {
+    color: $selected-fore-color;
+    background: $selected-back-color;
+    border-bottom: 1px solid transparent;
+  }
+  &:disabled {
+    color: $disabled-fore-color;
+    background-color: $disabled-back-color;
+  }
+}
+
+.no-transition * {
+  transition:none !important;
+}
+
+.titlebar {
+  width: 100%;
+  padding: $vgap $hgap;
+  color: $titlebar-fore-color;
+  background-color: $titlebar-back-color;
+}
+
+#main_content {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  border-top: 1px solid $light-color;
+}
+
+#main_canvas_container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-left: 1px solid $light-color;
+  &:focus {
+    outline: none;
+  }  
+}
+
+#webgl_canvas {
+  display: none;
+  position: absolute;
+  width: calc(100% - 2px);
+  height: calc(100% - 1px);
+  // border: 1px solid red;
+  &:focus {
+    outline: none;
+  }  
+}
+
+#about_content {
+  display: flex;
+  flex-direction: column;
+  padding: $vgap-large $hgap-large;
+  background-image: linear-gradient( #00000080, $primary-back-color), url('../images/blueprint_compasses.png');
+  background-blend-mode: saturation;
+  background-repeat: no-repeat;
+  background-position: bottom center;
+}
+
+#about_application_text {
+  width: 100%;
+  font-size: 4.0em;
+  text-align: center;
+  color: $accent-back-color;
+  background-color: transparent;
+  // text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #49ff18, 0 0 30px #49ff18, 0 0 40px #49ff18, 0 0 55px #49ff18, 0 0 75px #49ff18;
+  // text-shadow: 0 0 5px #c0c0c0, 0 0 10px #c0c0c0, 0 0 15px #c0c0c0, 0 0 20px #808080, 0 0 30px #808080, 0 0 40px #808080, 0 0 55px #808080, 0 0 75px #808080;
+  -webkit-text-stroke: 1px $accent-border-color;
+}
+
+#about_copyright_text {
+  width: 100%;
+  margin-top: $vgap-large;
+  font-size: 2em;
+  text-align: center;
+  color: $accent-back-color;
+  background-color: transparent;
+  // text-shadow: 0 0 5px #c0c0c0, 0 0 10px #c0c0c0, 0 0 15px #c0c0c0, 0 0 20px #808080, 0 0 30px #808080, 0 0 40px #808080, 0 0 55px #808080, 0 0 75px #808080;
+  -webkit-text-stroke: 1px $accent-border-color;
+}
+
+#about_copyright_image_text {
+  width: 100%;
+  margin-top: $vgap-large;
+  font-size: 0.5em;
+  text-align: center;
+  color: $accent-back-color;
+  background-color: transparent;
+}

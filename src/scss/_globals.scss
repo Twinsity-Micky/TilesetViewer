@@ -1,0 +1,118 @@
+@use 'sass:math';
+
+$default-font-size: 14px;
+$small-font-size: $default-font-size - math.div($default-font-size, 8);
+$medium-font-size: $default-font-size;
+$large-font-size: $default-font-size + math.div($default-font-size, 6);
+
+$error-color: rgb(255, 64, 64);
+$warning-color: orange;
+$info-color: rgb(64, 64, 255);
+
+$light-color: #363636;
+$shadow-color: black;
+$focus-color:#b5540e;
+
+$mono-spaced-font: Consolas, 'Courier New', Courier, monospace;
+
+$window-title-height: 42px;
+$titlebar-height: 32px;
+$toolbar-height: 48px;
+$sidebar-width: 48px;
+$sidebar-panel-width: 720px;
+
+$hgap: 10px;
+$hgap-small: 5px;
+$hgap-large: 20px;
+$vgap: 8px;
+$vgap-small: 4px;
+$vgap-large: 16px;
+
+$primary-font: Helvetica, Arial, sans-serif;
+$primary-font-size: $default-font-size;
+$primary-fore-color: #b0b0b0;
+$primary-back-color: #282828;
+$primary-border-color: #484848;
+
+$secondary-fore-color: #a0a0a0;
+$secondary-back-color: #161616;
+$secondary-border-color: #202020;
+
+$disabled-fore-color: #808080;
+$disabled-back-color: #242424;
+$disabled-border-color: #404040;
+
+$accent-color: #415970;
+$accent-fore-color: #f0f0f0;
+$accent-back-color: #415970;
+$accent-border-color: #314457;
+
+$highlight-color: #c46825;
+$highlight-fore-color: white;
+$highlight-back-color: #c46825;
+$highlight-back-color-transparent: #c4682580;
+
+$hover-color: #415970;
+$hover-fore-color: white;
+$hover-back-color: #415970;
+$hover-back-color-light: #4d6882;
+$hover-back-color-shadow: #394e62;
+$hover-border-color: #314457;
+
+$tooltip-fore-color: white;
+$tooltip-back-color: #404040;
+$tooltip-border-color: #808080;
+
+$dropdown-fore-color: white;
+$dropdown-back-color: #404040;
+$dropdown-border-color: #707070;
+
+$window-titlebar-fore-color: #d0d0d0;
+$window-titlebar-back-color: #282828;
+$window-titlebar-border-color: #000000;
+
+$popup-titlebar-fore-color: #d0d0d0;
+$popup-titlebar-back-color: #202020;
+$popup-titlebar-border-color: #000000;
+$popup-closer-fore-color: #d0d0d0;
+$popup-closer-back-color: #a00000;
+
+$titlebar-fore-color: #a0a0a0;
+$titlebar-back-color: #202020;
+$titlebar-border-color: #000000;
+
+$toolbar-fore-color: #a0a0a0;
+$toolbar-back-color: #202020;
+$toolbar-border-color: #404040;
+
+$toolbar-button-fore-color: $toolbar-fore-color;
+$toolbar-button-back-color: $toolbar-back-color;
+$toolbar-button-pressed-back-color: #b5540e;
+$toolbar-button-selected-back-color: #484848;
+$toolbar-button-border-color: $toolbar-border-color;
+
+$sidebar-fore-color: $toolbar-fore-color;
+$sidebar-back-color: $toolbar-back-color;
+$sidebar-border-color: $toolbar-border-color;
+
+$sidebar-button-fore-color: $sidebar-fore-color;
+$sidebar-button-back-color: $sidebar-back-color;
+$sidebar-button-pressed-back-color: $highlight-back-color;
+$sidebar-button-selected-back-color: $secondary-back-color;
+$sidebar-button-border-color: $sidebar-border-color;
+
+$button-fore-color: $primary-fore-color;
+$button-back-color: $primary-back-color;
+$button-back-color-light: #323232;
+$button-back-color-shadow: #242424;
+$button-pressed-back-color: #b5540e;
+$button-selected-back-color: #394e62;
+$button-border-color: $primary-border-color;
+
+$input-fore-color: #d0d0d0;//$primary-fore-color;
+$input-back-color: #323232;//$primary-back-color;
+$input-border-color: #404040;//$primary-border-color;
+
+$selected-fore-color: $accent-fore-color;
+$selected-back-color: $accent-back-color;
+$selected-border-color: $accent-border-color;

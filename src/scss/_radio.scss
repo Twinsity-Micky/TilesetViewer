@@ -1,0 +1,92 @@
+/* Base for label styling */
+[type='radio']:not(:checked),
+[type='radio']:checked {
+  //position: absolute;
+  //left: -9999px;
+  display: none;
+}
+[type='radio']:not(:checked) + label,
+[type='radio']:checked + label {
+  position: relative;
+  padding-left: 1.95em;
+  padding-top: 0.10em;
+  padding-right: 1.95em;
+  padding-bottom: 0.15em;
+  cursor: pointer;
+}
+
+/* checkbox aspect */
+[type='radio']:not(:checked) + label:before,
+[type='radio']:checked + label:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.4em;
+  height: 1.4em;
+  color: $primary-fore-color;
+  background-color: $primary-back-color;
+  border-radius: 0.75em;
+  border: 1px solid $primary-border-color;
+}
+
+/* checked mark aspect */
+[type='radio']:not(:checked) + label:after,
+[type='radio']:checked + label:after {
+  content: '\25cf\0020';
+  position: absolute;
+  top: 0.1em;
+  left: 0.25em;
+  font-size: 1.3em;
+  line-height: 0.8;
+  transition: all 0.2s;
+  // font-family: 'Lucida Sans Unicode', 'Arial Unicode MS', Arial;
+}
+
+/* checked mark aspect changes */
+[type='radio']:not(:checked) + label:after {
+  opacity: 0;
+  transform: scale(0);
+}
+
+[type='radio']:checked + label:after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* disabled checkbox */
+[type='radio']:disabled:not(:checked) + label:before,
+[type='radio']:disabled:checked + label:before {
+  opacity: 0.5;
+}
+
+[type='radio']:disabled:checked + label:after {
+  opacity: 0.5;
+}
+
+[type='radio']:disabled + label {
+  opacity: 0.5;
+}
+
+/* accessibility */
+[type='radio']:checked:focus + label:before,
+[type='radio']:not(:checked):focus + label:before {
+  border: 1px solid $focus-color;
+}
+
+// Enable hover on devices with mouse pointer
+@media (pointer: fine) {
+  /* hover style just for information */
+  [type='radio']:hover + label:before {
+    background-color: $hover-back-color;
+    border: 1px solid $hover-border-color;
+  }
+  [type='radio']:hover:not(:checked) + label:before,
+  [type='radio']:hover:checked + label:before {
+    color: $hover-fore-color;
+  }
+  [type='radio']:hover:checked + label:after {
+    color: $hover-fore-color;
+  }
+
+}

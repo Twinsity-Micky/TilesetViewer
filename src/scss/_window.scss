@@ -1,0 +1,75 @@
+@use 'sass:math';
+
+.window-titlebar-background {
+  width: 100%;
+  height: $window-title-height;
+  min-height: $window-title-height;
+  max-height: $window-title-height;
+  background-color: $window-titlebar-back-color;
+  border-bottom: 1px solid $shadow-color;
+}
+
+.window-titlebar-area {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  width: calc(100% - 140px);
+  height: 100%;
+}
+
+.window-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;  
+}
+
+.window-titlebar-icon {
+  margin-left: 10px;
+  width: 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.window-titlebar-label {
+  margin-left: 10px;
+  justify-self: center;
+  color: $window-titlebar-fore-color;
+  &.disabled {
+    color: $disabled-fore-color;
+  }
+}
+
+.window-titlebar-button {
+  width: $toolbar-height + 10;
+  height: $toolbar-height - 8;
+  opacity: 0.8;
+  color: $window-titlebar-fore-color;
+  background-color: $window-titlebar-back-color;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+
+  &:hover {
+    &:enabled {
+      background-color: #484848;
+      &:active {
+        background-color: #606060;
+      }
+    }
+  }
+
+  &:focus {
+    outline: none;
+  }  
+
+  &:active {
+    background-color: #606060;
+  }
+}

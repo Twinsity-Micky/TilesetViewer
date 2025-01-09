@@ -1,0 +1,52 @@
+#hamburger_dropdown {
+  button {
+    background-image: none;
+    text-wrap: nowrap;    
+  }
+}
+
+#locale_dropdown {
+  width: 100%;
+}
+
+#hamburger_dropdown_content {
+  flex-direction: column;
+  right: 0;
+}
+
+#locale_dropdown_content {
+  flex-direction: column;
+}
+
+#hamburger_dropdown_locale_row {
+  button {
+    width: 100%;
+    border: none;
+    outline: none;
+  }
+}
+
+#hamburger_dropdown_fullscreen_row {
+  button {
+    width: 100%;
+    border: none;
+    outline: none;
+  }
+}
+
+#hamburger_dropdown_help_row {
+  button {
+    width: 100%;
+    border: none;
+    outline: none;
+  }
+}
+
+#hamburger_dropdown_about_row {
+  button {
+    width: 100%;
+    border: none;
+    outline: none;
+  }
+}
+

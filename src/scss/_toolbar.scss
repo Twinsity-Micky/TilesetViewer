@@ -1,0 +1,113 @@
+@use 'sass:math';
+
+.toolbar {
+  display: flex;
+  flex-direction: row;
+  color: $toolbar-fore-color;
+  background-color: $toolbar-back-color;
+}
+
+.toolbar-text-button {
+  margin-left: 5px;
+  margin-right: 5px;
+  // margin: 8px 4px;
+  // padding-left: 8px;
+  // padding-right: 8px;
+  // padding-bottom: 8px;
+}
+
+.toolbar-button {
+  width: $toolbar-height - 2;
+  height: $toolbar-height - 8;
+  padding: $vgap $hgap;
+  opacity: 0.8;
+  color: $toolbar-fore-color;
+  background-color: $toolbar-button-back-color;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: background-color, background-image 0.8s ease;
+  border: none;
+
+  &:hover {
+    &:enabled {
+      opacity: 1;
+      color: $hover-fore-color;
+      background-color: $hover-back-color;
+
+      &.selected {
+        background-color: $toolbar-button-selected-back-color;
+      }
+
+      &:active {
+        background-color: $toolbar-button-pressed-back-color;
+      }
+    }
+  }
+
+  &:focus {
+    outline: none;
+  }  
+
+  &.selected {
+    background-color: $toolbar-button-selected-back-color;
+  }
+
+  &:enabled {
+    &:active {
+      background-color: $toolbar-button-pressed-back-color;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    border:none;
+  }
+
+}
+
+.toolbar-text {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin-right: 10px;
+  color: $accent-back-color;
+}
+
+.toolbar-separator {
+  width: 2px;
+  height: calc($toolbar-height - 12px);
+  margin-left: 10px;
+  margin-right: 10px;
+  // margin-top: 5px;
+  // margin-left: calc($toolbar-height / 2);
+  // margin-right: calc($toolbar-height / 2);
+  border-left: 1px solid $shadow-color;
+  border-right: 1px solid $light-color;
+}
+
+#main_toolbar {
+  width: 100%;
+  height: $toolbar-height;
+  min-height: $toolbar-height;
+  max-height: $toolbar-height;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-top: 1px solid $light-color;
+  border-bottom: 1px solid $shadow-color;
+}
+
+#garden_sample_button {
+  margin-left: 10px;
+}
+
+#hamburger_dropdown {
+  margin-left: auto;
+}
+
+#hamburger_dropdown_button {
+  color: white;
+  font-size: 1.5em;
+  background-image: none;
+}
+
+

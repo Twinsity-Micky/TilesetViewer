@@ -1,0 +1,7 @@
+**/.cache
+**/dist
+**/devDist
+**/build
+**/node_modules
+**/coverage
+src/metronic-theme
