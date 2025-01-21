@@ -18,7 +18,7 @@ export default class CommandFactory {
   }
 
   public static createStreetSampleCommand(): Command {
-    return new BasicCommand('FactorySampleCommand');
+    return new BasicCommand('StreetSampleCommand');
   }
 
   public static createLocalGardenSampleCommand(): Command {

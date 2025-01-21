@@ -1,14 +1,29 @@
-import { ArcRotateCamera, Scene, Vector3, Matrix, Tools, AssetContainer, SceneLoader, Mesh } from '@babylonjs/core';
-import FirstPersonViewport, { FirstPersonViewportOptions } from '@deck.gl/core/dist/viewports/first-person-viewport';
-import { Tiles3DLoader, Tiles3DLoaderOptions, Tiles3DTilesetJSONPostprocessed } from '@loaders.gl/3d-tiles';
+import {
+  ArcRotateCamera,
+  Scene,
+  Vector3,
+  Matrix,
+  Tools,
+  AssetContainer,
+  SceneLoader,
+  Mesh,
+  Quaternion,
+} from '@babylonjs/core';
+import FirstPersonViewport from '@deck.gl/core/dist/viewports/first-person-viewport';
+
 import { load, LoaderOptions } from '@loaders.gl/core';
+import { Tiles3DLoader, Tiles3DLoaderOptions, Tiles3DTilesetJSONPostprocessed } from '@loaders.gl/3d-tiles';
 import { Tileset3D, Tile3D, TILE_CONTENT_STATE, TILE_TYPE } from '@loaders.gl/tiles';
-import { Vector3 as MathGLVector3 } from '@math.gl/core';
+import { Vector3 as MathGLVector3, Matrix4, toDegrees } from '@math.gl/core';
+import { PI_OVER_TWO, TWO_PI } from '@math.gl/core/dist/lib/math-utils';
+import { Ellipsoid } from '@math.gl/geospatial';
+
 import MainModel from '../../app/model/MainModel';
 
 interface TileItem {
   asset: AssetContainer;
   assetRoot: Mesh;
+  addedToScene: boolean;
 }
 
 export default class TilesetObject {
@@ -19,12 +34,13 @@ export default class TilesetObject {
   private tilesetURL: string;
   private tilesetJson: Tiles3DTilesetJSONPostprocessed;
   private tileset: Tileset3D;
+  private glGlobalTransform: Matrix4;
+  private glInverseGlobalTransform: Matrix4;
 
   private tileMap: Map<string, TileItem> = new Map();
   private tileUnloadQueue = [];
 
   private lastFrameState = -1;
-  private loadInProgress = false;
 
   constructor(scene: Scene, camera: ArcRotateCamera, w: number, h: number) {
     this.scene = scene;
@@ -38,10 +54,10 @@ export default class TilesetObject {
   }
 
   private destroy() {
-    this.tileMap?.values().forEach(tileItem => {
+    for (const tileItem of this.tileMap.values()) {
       tileItem.asset.dispose();
       tileItem.assetRoot.dispose();
-    });
+    }
     this.tileMap?.clear();
     this.tileUnloadQueue = [];
     this.tileset?.destroy();
@@ -49,19 +65,10 @@ export default class TilesetObject {
   }
 
   public async load(url: string) {
-    console.log('--> load: ', url);
-    this.loadInProgress = true;
-    setTimeout(() => {
-      this.doLoad(url);
-    }, 100);
-    this.loadInProgress = false;
-  }
-
-  private async doLoad(url: string) {
     this.destroy();
 
     const _this = this;
-    this.tilesetURL = url;   
+    this.tilesetURL = url;
 
     let credentials: RequestCredentials = 'include';
     if (url.startsWith('http://localhost') || url.indexOf('0731_FREEMAN_ALLEY_10M_A_36x8K__10K-PN_50P_DB') > 0) {
@@ -74,7 +81,7 @@ export default class TilesetObject {
       // gltf: {
       //   decompressMeshes: false,
       //   postProcess: false,
-      //   //   loadImages: false,
+      //   loadImages: false,
       // },
       '3d-tiles': {
         loadGLTF: false,
@@ -83,12 +90,13 @@ export default class TilesetObject {
         credentials,
       },
     };
+    console.log('--> loadOptions: ', loadOptions);
 
     this.tilesetJson = await load(url, Tiles3DLoader, loadOptions);
 
     console.log(this.tilesetJson);
 
-    const model =  MainModel.getInstance();
+    const model = MainModel.getInstance();
     const sse = Math.max(1.0, Math.min(16, this.tilesetJson.lodMetricValue));
     const maximumMemoryUsage = model.getMaximumMemoryUsage().getValue();
     const maximumTilesSelected = model.getMaximumTilesSelected().getValue();
@@ -106,9 +114,6 @@ export default class TilesetObject {
       maximumTilesSelected,
       // maxRequests: 30,
 
-      /**
-       * We need this method because we have to calculate memory usage ourselves
-       */
       async contentLoader(tile: Tile3D) {
         let tileItem: TileItem = _this.tileMap.get(tile.id);
 
@@ -129,7 +134,44 @@ export default class TilesetObject {
         }
       },
 
-      // onTileLoad(tile: Tile3D) {  },
+      onTileLoad(tile: Tile3D) {
+        let tileItem: TileItem = _this.tileMap.get(tile.id);
+
+        if (!tileItem) return;
+
+        // Convert tile's center from ECEF to ENU (relative to tileset center)
+        const glTileCenterECEF = tile.boundingVolume.center;
+        const glTileCenterENU = new MathGLVector3(_this.glInverseGlobalTransform.transform(glTileCenterECEF));
+        const tileCenter = _this.toBabylonVector3(glTileCenterENU);
+
+        // Convert tile's model matrix to Babylon.js format
+        const tileMatrix = Matrix.FromArray(tile.content.modelMatrix);
+        const zUpToYUp = Matrix.RotationX(-Math.PI / 2);
+        const glTileMatrix = tileMatrix.multiply(zUpToYUp);
+
+        // Decompose final glTileMatrix into position, rotation, and scale
+        const scale = Vector3.One();
+        const rotation = Quaternion.Identity();
+        const translation = Vector3.Zero();
+
+        glTileMatrix.decompose(scale, rotation, translation);
+
+        // Adjust translation using tile's global offset in ENU
+        translation.addInPlace(tileCenter);
+
+        const glFinalTileMatrix = glTileMatrix
+          .getRotationMatrix()
+          .clone()
+          .multiply(Matrix.Translation(translation.x, translation.y, translation.z));
+
+        glFinalTileMatrix.decompose(scale, rotation, translation);
+
+        // Apply final transformations to the Babylon.js mesh
+        tileItem.assetRoot.position = translation; // Corrected position
+        tileItem.assetRoot.rotationQuaternion = rotation; // Corrected rotation
+
+        _this.update();
+      },
 
       onTileUnload(tile: Tile3D) {
         _this.tileUnloadQueue.push(tile);
@@ -141,6 +183,9 @@ export default class TilesetObject {
     });
 
     this.tileset.maximumMemoryUsage = this.tileset.options.maximumMemoryUsage;
+
+    this.glGlobalTransform = Ellipsoid.WGS84.eastNorthUpToFixedFrame(this.tileset.cartesianCenter);
+    this.glInverseGlobalTransform = this.glGlobalTransform.clone().invert();
 
     model.getScreenSpaceError().setValue(sse);
   }
@@ -158,15 +203,15 @@ export default class TilesetObject {
   }
 
   public updateShowBoundingBoxes() {
-    if (!this.tileset || this.loadInProgress) return;
+    if (!this.tileset) return;
 
     const showBoundingBoxes = MainModel.getInstance().getShowBoundingBoxes().getValue();
-    this.tileMap.values().forEach((tileItem) => {
+    for (const tileItem of this.tileMap.values()) {
       tileItem.asset.meshes.forEach((mesh) => {
         if (mesh.name === '__root__') return;
         mesh.showBoundingBox = showBoundingBoxes;
       });
-    });
+    }
   }
 
   public updateScreenSpaceError() {
@@ -174,56 +219,57 @@ export default class TilesetObject {
 
     const sse = MainModel.getInstance().getScreenSpaceError().getValue();
     this.tileset.options.maximumScreenSpaceError = sse;
-    this.tileset.memoryAdjustedScreenSpaceError =  4 * sse;
+    this.tileset.memoryAdjustedScreenSpaceError = 4 * sse;
     this.tileset.adjustScreenSpaceError();
     this.update();
   }
 
   public async update() {
-    if (!this.tileset || this.loadInProgress) return;
-
-    const camPos = this.camera.position.clone();
-    const camOffs = new Vector3(0, 0, 0)
-    camPos.addInPlace(camOffs);
-
-    const glPosition = this.toMathGLVector3(camPos);
-
-    const [longitude, latitude, altitude] = this.tileset.root.boundingBox[0];
-    // const [longitude, latitude, altitude] = this.tileset.ellipsoid.cartesianToCartographic(
-    //   glPosition.transform(this.tileset.root.transform)
-    // );
-
-
-    const alphaDeg = Tools.ToDegrees(this.camera.alpha);
-    const betaDeg = Tools.ToDegrees(this.camera.beta);
-    const pitch = (betaDeg - 90) % 360;
-    const bearing = (-alphaDeg - 90) % 360;
-    const savedMinZ = this.camera.minZ;
-    // TODO! Find out why loaders need a near plane of minimum 1
-    this.camera.minZ = 1;
-    const projectionMatrix = this.camera.getProjectionMatrix().transpose().asArray();
-    this.camera.minZ = savedMinZ;
-
-    const options: FirstPersonViewportOptions = {
-      longitude,
-      latitude,
-      position: [glPosition[0], glPosition[1], glPosition[2] + altitude],
-      pitch,
-      bearing,
-      width: this.viewWidth,
-      height: this.viewHeight,
-      projectionMatrix,
-    };
+    if (!this.tileset) return;
 
     try {
+      const camPos = this.camera.position.clone();
+      const camTarget = this.camera.target.clone();
+
+      const glCamPos = this.toMathGLVector3(camPos);
+      const glCamTarget = this.toMathGLVector3(camTarget);
+      const glCamForward = new MathGLVector3( // actually is forward vector in ENU, not ECEF. Why does it work?
+        glCamTarget.x - glCamPos.x,
+        glCamTarget.y - glCamPos.y,
+        glCamTarget.z - glCamPos.z
+      ).normalize();
+
+      const glCamPosECEF = this.glGlobalTransform.transform([
+        // transform camera from ENU into ECEF
+        glCamPos.x,
+        glCamPos.y,
+        glCamPos.z,
+      ]);
+
+      const [longitude, latitude, altitude] = Ellipsoid.WGS84.cartesianToCartographic(glCamPosECEF);
+      const bearing = toDegrees(TWO_PI - cesiumZeroToTwoPi(Math.atan2(glCamForward.y, glCamForward.x) - PI_OVER_TWO));
+      const pitch = -Tools.ToDegrees(PI_OVER_TWO - cesiumAcosClamped(glCamForward.z));
+
+      const viewport = new FirstPersonViewport({
+        longitude,
+        latitude,
+        position: [0, 0, altitude],
+        pitch: pitch,
+        bearing: bearing,
+        width: this.viewWidth,
+        height: this.viewHeight,
+      });
+
       let closestDistanceToCamera = Number.MAX_VALUE;
-      const viewport = new FirstPersonViewport(options);
       const frameState = await this.tileset.selectTiles(viewport);
 
       if (frameState === this.lastFrameState) return;
 
       this.lastFrameState = frameState;
 
+      for (const tileItem of this.tileMap.values()) tileItem.addedToScene = undefined;
+
+      // Show/Hide tiles
       this.tileset?.tiles.forEach((tile: Tile3D) => {
         const tileItem = this.tileMap.get(tile.id);
         if (!tileItem) return;
@@ -232,14 +278,16 @@ export default class TilesetObject {
           closestDistanceToCamera = Math.min(closestDistanceToCamera, tile.distanceToCamera);
           tileItem.assetRoot.setEnabled(true);
           tileItem.asset.addAllToScene();
+          tileItem.addedToScene = true;
           return;
         }
 
         tileItem.assetRoot.setEnabled(false);
         tileItem.asset.removeAllFromScene();
+        tileItem.addedToScene = false;
       });
 
-      // Unload the tiles
+      // Unload tiles
       while (this.tileUnloadQueue.length > 0) {
         const tile = this.tileUnloadQueue.pop();
         const tileItem = this.tileMap.get(tile.id);
@@ -250,22 +298,28 @@ export default class TilesetObject {
         }
       }
 
-      if (!this.tileset) return;
+      for (const tileItem of this.tileMap.values()) {
+        if (tileItem.addedToScene === undefined) {
+          tileItem.asset.removeFromScene();
+        }
+      }
 
-      const cameraPositionString = this.camera.position.x.toFixed(2) + ', ' + this.camera.position.y.toFixed(2) + ', ' + this.camera.position.z.toFixed(2);
-      const cameraTargetString = this.camera.target.x.toFixed(2) + ', ' + this.camera.target.y.toFixed(2) + ', ' + this.camera.target.z.toFixed(2);
+      const cameraPositionString =
+        glCamPosECEF[0].toFixed(2) + ', ' + glCamPosECEF[1].toFixed(2) + ', ' + glCamPosECEF[2].toFixed(2);
+      const cameraTargetString =
+        glCamTarget[0].toFixed(2) + ', ' + glCamTarget[1].toFixed(2) + ', ' + glCamTarget[2].toFixed(2);
       const stats = {
-        cameraPosition: cameraPositionString,
-        cameraTarget: cameraTargetString,
+        camPos: cameraPositionString,
+        camTarget: cameraTargetString,
         dist: closestDistanceToCamera.toFixed(2),
-        viewDistanceScale: this.tileset.options.viewDistanceScale,
+        viewDistanceScale: this.tileset?.options.viewDistanceScale,
         tileMap: this.tileMap.size.toFixed(),
         unloadQueue: this.tileUnloadQueue.length.toFixed(),
-        tilesetStats: Object.entries(this.tileset.stats.getTable()).reduce(
+        tilesetStats: Object.entries(this.tileset?.stats.getTable()).reduce(
           (acc, [key, value]) => ({ ...acc, [key]: value.count }),
           {}
         ),
-        fps: this.scene.getEngine().getFps().toFixed()
+        fps: this.scene.getEngine().getFps().toFixed(),
       };
       const statsText = JSON.stringify(stats, null, 2);
       MainModel.getInstance().getTilesetStats().setValue(statsText);
@@ -278,6 +332,7 @@ export default class TilesetObject {
     const tileItem: TileItem = {
       asset: null,
       assetRoot: null,
+      addedToScene: false,
     };
 
     if (!tile.content.byteLength) {
@@ -327,15 +382,49 @@ export default class TilesetObject {
 
   private toBabylonVector3(v: MathGLVector3): Vector3 {
     if (this.scene.useRightHandedSystem) {
-      return new Vector3(v.x, v.z, v.y);
+      return new Vector3(v.x, v.z, -v.y);
     }
-    return new Vector3(-v.x, v.z, -v.y);
+    return new Vector3(v.x, v.z, v.y);
   }
 
   private toMathGLVector3(v: Vector3): MathGLVector3 {
     if (this.scene.useRightHandedSystem) {
-      return new MathGLVector3(v.x, v.z, v.y);
+      return new MathGLVector3(v.x, -v.z, v.y);
     }
-    return new MathGLVector3(-v.x, -v.z, v.y);
+    return new MathGLVector3(v.x, v.z, v.y);
   }
 }
+
+// HINT! Copy of the cesium zeroToTwoPi function to avoid importing the cesium lib
+const EPSILON14 = 0.00000000000001;
+
+const cesiumMod = (m, n) => {
+  if (Math.sign(m) === Math.sign(n) && Math.abs(m) < Math.abs(n)) {
+    // Early exit if the input does not need to be modded. This avoids
+    // unnecessary math which could introduce floating point error.
+    return m;
+  }
+  return ((m % n) + n) % n;
+};
+
+const cesiumZeroToTwoPi = (angle) => {
+  if (angle >= 0 && angle <= TWO_PI) {
+    // Early exit if the input is already inside the range. This avoids
+    // unnecessary math which could introduce floating point error.
+    return angle;
+  }
+  const mod = cesiumMod(angle, TWO_PI);
+  if (Math.abs(mod) < EPSILON14 && Math.abs(angle) > EPSILON14) {
+    return TWO_PI;
+  }
+  return mod;
+};
+
+const cesiumClamp = (value, min, max) => {
+  return value < min ? min : value > max ? max : value;
+};
+
+const cesiumAcosClamped = (value) => {
+  return Math.acos(cesiumClamp(value, -1.0, 1.0));
+};
+// HINT end

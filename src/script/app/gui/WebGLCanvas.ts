@@ -11,6 +11,7 @@ import {
   MeshBuilder,
   Scene,
   SceneLoader,
+  StandardMaterial,
   Vector3,
 } from '@babylonjs/core';
 
@@ -33,6 +34,7 @@ export default class WebGLCanvas {
   private axes: AxesViewer;
   private tilesetObject: TilesetObject;
   private isRenderLoopRunning = false;
+  private lastCameraMatrix: Matrix = null;
 
   private canvasResizeObserver = new ResizeObserver(() => {
     this.onResize();
@@ -97,7 +99,7 @@ export default class WebGLCanvas {
   private async initScene() {
     // Create the scene
     this.scene = new Scene(this.engine);
-    // this.scene.useRightHandedSystem = true;
+    this.scene.useRightHandedSystem = true;
 
     // Performance flags for the scene
     this.scene.skipPointerMovePicking = true; // Do not raise events on pointer move
@@ -143,7 +145,6 @@ export default class WebGLCanvas {
     this.grid.setEnabled(MainModel.getInstance().getShowGrid().valueOf());
 
     this.axes = new AxesViewer(this.scene, 5);
-
     this.axes.update(Vector3.Zero(), new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1));
 
     const rect = this.htmlCanvasContainer.getBoundingClientRect();
@@ -152,7 +153,8 @@ export default class WebGLCanvas {
       window.location.search?.length > 1
         ? window.location.search.substring(1)
         // : 'https://3dtiles.twinspect.app/data/valdemorillo/tileset.json';
-        : 'https://int.nyt.com/data/3dscenes/ONA360/TILESET/0731_FREEMAN_ALLEY_10M_A_36x8K__10K-PN_50P_DB/tileset_tileset.json';
+        // : 'https://int.nyt.com/data/3dscenes/ONA360/TILESET/0731_FREEMAN_ALLEY_10M_A_36x8K__10K-PN_50P_DB/tileset_tileset.json';
+        : 'http://localhost:8080/COWI_bridge_11_geo/tileset.json';
 
     this.tilesetObject = new TilesetObject(this.scene, this.camera, rect.width - 2, rect.height - 2);
 
@@ -229,6 +231,9 @@ export default class WebGLCanvas {
       new (class extends BasicCommand {
         async execute() {
             await _this.tilesetObject.load('https://3dtiles.twinspect.app/data/valdemorillo/tileset.json');
+            // This targets the camera to scene origin
+            _this.camera.setPosition(new Vector3(20, 20, 20));
+            _this.camera.setTarget(Vector3.Zero());
           }
       })()
     );
@@ -236,6 +241,9 @@ export default class WebGLCanvas {
       new (class extends BasicCommand {
         async execute() {
           await _this.tilesetObject.load('https://3dtiles.twinspect.app/data/COWI_bridge_11_geo/tileset.json');
+          // This targets the camera to scene origin
+          _this.camera.setPosition(new Vector3(20, 20, 20));
+          _this.camera.setTarget(Vector3.Zero());
         }
       })()
     );
@@ -243,6 +251,9 @@ export default class WebGLCanvas {
       new (class extends BasicCommand {
         async execute() {
           await _this.tilesetObject.load('https://3dtiles.twinspect.app/data/phase_one_factory/tileset.json');
+          // This targets the camera to scene origin
+          _this.camera.setPosition(new Vector3(20, 20, 20));
+          _this.camera.setTarget(Vector3.Zero());
         }
       })()
     );
@@ -250,6 +261,9 @@ export default class WebGLCanvas {
       new (class extends BasicCommand {
         async execute() {
           await _this.tilesetObject.load('https://int.nyt.com/data/3dscenes/ONA360/TILESET/0731_FREEMAN_ALLEY_10M_A_36x8K__10K-PN_50P_DB/tileset_tileset.json');
+          // This targets the camera to scene origin
+          _this.camera.setPosition(new Vector3(20, 20, 20));
+          _this.camera.setTarget(Vector3.Zero());
         }
       })()
     );
@@ -257,6 +271,9 @@ export default class WebGLCanvas {
       new (class extends BasicCommand {
         async execute() {
           await _this.tilesetObject.load('http://localhost:8080/Valdemorillo/tileset.json');
+          // This targets the camera to scene origin
+          _this.camera.setPosition(new Vector3(20, 20, 20));
+          _this.camera.setTarget(Vector3.Zero());
         }
       })()
     );
@@ -264,6 +281,9 @@ export default class WebGLCanvas {
       new (class extends BasicCommand {
         async execute() {
           await _this.tilesetObject.load('http://localhost:8080/COWI_bridge_11_geo/tileset.json');
+          // This targets the camera to scene origin
+          _this.camera.setPosition(new Vector3(20, 20, 20));
+          _this.camera.setTarget(Vector3.Zero());
         }
       })()
     );
@@ -271,6 +291,9 @@ export default class WebGLCanvas {
       new (class extends BasicCommand {
         async execute() {
           await _this.tilesetObject.load('http://localhost:8080/PhaseOne/tileset.json');
+          // This targets the camera to scene origin
+          _this.camera.setPosition(new Vector3(20, 20, 20));
+          _this.camera.setTarget(Vector3.Zero());
         }
       })()
     );
@@ -278,6 +301,9 @@ export default class WebGLCanvas {
       new (class extends BasicCommand {
         async execute() {
           await _this.tilesetObject.load('http://localhost:8080/MetaShape_Container/tileset.json');
+          // This targets the camera to scene origin
+          _this.camera.setPosition(new Vector3(20, 20, 20));
+          _this.camera.setTarget(Vector3.Zero());
         }
       })()
     );
@@ -285,6 +311,9 @@ export default class WebGLCanvas {
       new (class extends BasicCommand {
         async execute() {
           await _this.tilesetObject.load('http://localhost:8080/Pix4D_Container/rainbow_containers/Rainbow_containers-cesium_mesh/tileset.json');
+          // This targets the camera to scene origin
+          _this.camera.setPosition(new Vector3(20, 20, 20));
+          _this.camera.setTarget(Vector3.Zero());
         }
       })()
     );
@@ -292,6 +321,9 @@ export default class WebGLCanvas {
       new (class extends BasicCommand {
         async execute() {
           await _this.tilesetObject.load('http://localhost:8080/RealityCapture_Container/3Dtiles/tileset.json');
+          // This targets the camera to scene origin
+          _this.camera.setPosition(new Vector3(20, 20, 20));
+          _this.camera.setTarget(Vector3.Zero());
         }
       })()
     );
@@ -315,11 +347,24 @@ export default class WebGLCanvas {
     // Things that must be done before the next frame is rendered
 
     const pointers = this.camera.inputs.attached.pointers as ArcRotateCameraPointersInput;
+
     if (pointers) {
       // distance-adjusted panning sensibility
       pointers.panningSensibility = 11 / (this.camera.radius / this.camera.upperRadiusLimit);
       this.camera.wheelPrecision = 5e5 / this.camera.radius / this.camera.upperRadiusLimit;
     }
+
+    if (
+      (Math.abs(this.camera.inertialAlphaOffset) > 0.0) ||
+      (Math.abs(this.camera.inertialBetaOffset) > 0.0) ||
+      (Math.abs(this.camera.inertialRadiusOffset) > 0.0) ||
+      (this.lastCameraMatrix && this.lastCameraMatrix.equalsWithEpsilon(this.camera.getWorldMatrix(), 0.01))
+    ) {
+      return;
+    }
+
+    this.lastCameraMatrix = this.camera.getWorldMatrix().clone();
+
     this.tilesetObject?.update();
   }
 

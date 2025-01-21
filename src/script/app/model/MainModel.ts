@@ -1,5 +1,3 @@
-import { Tiles3DTileJSONPostprocessed, Tiles3DTilesetJSONPostprocessed } from '@loaders.gl/3d-tiles';
-
 import BasicContainer from '../../lib/model/BasicContainer';
 import CommandFactory from './CommandFactory';
 import CommandComponent from '../../lib/model/CommandComponent';
@@ -93,9 +91,9 @@ export default class MainModel extends BasicContainer {
 
     this.add(new BooleanComponent(this, MainModel.SHOW_GRID, true));
     this.add(new BooleanComponent(this, MainModel.SHOW_AXES, true));
-    this.add(new BooleanComponent(this, MainModel.SHOW_BOUNDING_BOXES, true));
+    this.add(new BooleanComponent(this, MainModel.SHOW_BOUNDING_BOXES, false));
     this.add(new NumberComponent(this, MainModel.SCREEN_SPACE_ERROR, 16.0));
-    this.add(new NumberComponent(this, MainModel.MAXIMUM_MEMORY_USAGE, 512.0));
+    this.add(new NumberComponent(this, MainModel.MAXIMUM_MEMORY_USAGE, 1024.0));
     this.add(new NumberComponent(this, MainModel.MAXIMUM_TILES_SELECTED, 4096.0));
     this.add(new StringComponent(this, MainModel.TILESET_STATS));
   }
