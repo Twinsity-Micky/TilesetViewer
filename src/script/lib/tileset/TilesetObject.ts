@@ -139,32 +139,45 @@ export default class TilesetObject {
 
         if (!tileItem) return;
 
-        // Convert tile's center from ECEF to ENU (relative to tileset center)
-        const glTileCenterECEF = tile.boundingVolume.center;
-        const glTileCenterENU = new MathGLVector3(_this.glInverseGlobalTransform.transform(glTileCenterECEF));
-        const tileCenter = _this.toBabylonVector3(glTileCenterENU);
+        // // Convert tile's center from ECEF to ENU (relative to tileset center)
+        // const glTileCenterECEF = tile.boundingVolume.center;
+        // const glTileCenterENU = new MathGLVector3(_this.glInverseGlobalTransform.transform(glTileCenterECEF));
+        // const tileCenter = _this.toBabylonVector3(glTileCenterENU);
 
-        // Convert tile's model matrix to Babylon.js format
-        const tileMatrix = Matrix.FromArray(tile.content.modelMatrix);
-        const zUpToYUp = Matrix.RotationX(-Math.PI / 2);
-        const glTileMatrix = tileMatrix.multiply(zUpToYUp);
+        // // Convert tile's model matrix to Babylon.js format
+        // const tileMatrix = Matrix.FromArray(tile.content.modelMatrix);
+        // const zUpToYUp = Matrix.RotationX(-Math.PI / 2);
+        // const glTileMatrix = tileMatrix.multiply(zUpToYUp);
 
-        // Decompose final glTileMatrix into position, rotation, and scale
-        const scale = Vector3.One();
-        const rotation = Quaternion.Identity();
-        const translation = Vector3.Zero();
+        // // Decompose final glTileMatrix into position, rotation, and scale
+        // const scale = Vector3.One();
+        // const rotation = Quaternion.Identity();
+        // const translation = Vector3.Zero();
 
-        glTileMatrix.decompose(scale, rotation, translation);
+        // glTileMatrix.decompose(scale, rotation, translation);
 
-        // Adjust translation using tile's global offset in ENU
-        translation.addInPlace(tileCenter);
+        // // Adjust translation using tile's global offset in ENU
+        // translation.addInPlace(tileCenter);
 
-        const glFinalTileMatrix = glTileMatrix
-          .getRotationMatrix()
-          .clone()
-          .multiply(Matrix.Translation(translation.x, translation.y, translation.z));
+        // const glFinalTileMatrix = glTileMatrix
+        //   .getRotationMatrix()
+        //   .clone()
+        //   .multiply(Matrix.Translation(translation.x, translation.y, translation.z));
 
-        glFinalTileMatrix.decompose(scale, rotation, translation);
+        // glFinalTileMatrix.decompose(scale, rotation, translation);
+
+
+        const cartesianModelMatrix = _this.calculateCartesianModelMatrix(tile);  // transformation matrix for tile meshes in ECEF
+        if (!cartesianModelMatrix) return;
+
+        const {ecefToEnu, ecefToEnuYUp} = _this.calculateTilesetTransforms();
+        const tileToLocalBabylonMatrix = ecefToEnuYUp.multiplyRight(cartesianModelMatrix);
+
+        const babylonMatrix = Matrix.FromArray(tileToLocalBabylonMatrix);
+        var scale = new Vector3();
+        var rotation = new Quaternion();
+        var translation = new Vector3();
+        babylonMatrix.decompose(scale, rotation, translation);
 
         // Apply final transformations to the Babylon.js mesh
         tileItem.assetRoot.position = translation; // Corrected position
@@ -228,27 +241,45 @@ export default class TilesetObject {
     if (!this.tileset) return;
 
     try {
-      const camPos = this.camera.position.clone();
-      const camTarget = this.camera.target.clone();
+      // const camPos = this.camera.position.clone();
+      // const camTarget = this.camera.target.clone();
 
-      const glCamPos = this.toMathGLVector3(camPos);
-      const glCamTarget = this.toMathGLVector3(camTarget);
-      const glCamForward = new MathGLVector3( // actually is forward vector in ENU, not ECEF. Why does it work?
-        glCamTarget.x - glCamPos.x,
-        glCamTarget.y - glCamPos.y,
-        glCamTarget.z - glCamPos.z
-      ).normalize();
+      // const glCamPos = this.toMathGLVector3(camPos);
+      // const glCamTarget = this.toMathGLVector3(camTarget);
+      // const glCamForward = new MathGLVector3( // actually is forward vector in ENU, not ECEF. Why does it work?
+      //   glCamTarget.x - glCamPos.x,
+      //   glCamTarget.y - glCamPos.y,
+      //   glCamTarget.z - glCamPos.z
+      // ).normalize();
 
-      const glCamPosECEF = this.glGlobalTransform.transform([
-        // transform camera from ENU into ECEF
-        glCamPos.x,
-        glCamPos.y,
-        glCamPos.z,
-      ]);
+      // const glCamPosECEF = this.glGlobalTransform.transform([
+      //   // transform camera from ENU into ECEF
+      //   glCamPos.x,
+      //   glCamPos.y,
+      //   glCamPos.z,
+      // ]);
 
-      const [longitude, latitude, altitude] = Ellipsoid.WGS84.cartesianToCartographic(glCamPosECEF);
-      const bearing = toDegrees(TWO_PI - cesiumZeroToTwoPi(Math.atan2(glCamForward.y, glCamForward.x) - PI_OVER_TWO));
-      const pitch = -Tools.ToDegrees(PI_OVER_TWO - cesiumAcosClamped(glCamForward.z));
+      // const [longitude, latitude, altitude] = Ellipsoid.WGS84.cartesianToCartographic(glCamPosECEF);
+      // const bearing = toDegrees(TWO_PI - cesiumZeroToTwoPi(Math.atan2(glCamForward.y, glCamForward.x) - PI_OVER_TWO));
+      // const pitch = -Tools.ToDegrees(PI_OVER_TWO - cesiumAcosClamped(glCamForward.z));
+
+      const babylonCamera = this.scene.activeCamera as ArcRotateCamera;
+ 
+      const { ecefToEnu, ecefToEnuYUp } = this.calculateTilesetTransforms();
+      const enuYUptoECEF = ecefToEnuYUp.clone().invert(); // from ENU Y Up (scene-based handedness) to ECEF Z Up (origin is referenceECEF)
+ 
+      // calculate long/lat/alt from local ENU camera position. First transform to ECEF, then to cartographic
+      const camPosLocal = new MathGLVector3(babylonCamera.position.x, babylonCamera.position.y, babylonCamera.position.z);
+      const camTargetLocal = new MathGLVector3(babylonCamera.target.x, babylonCamera.target.y, babylonCamera.target.z);
+      const cameraPositionECEF = new MathGLVector3(enuYUptoECEF.transform(camPosLocal));
+      const cameraTargetECEF = new MathGLVector3(enuYUptoECEF.transform(camTargetLocal));
+      const [longitude, latitude, altitude] = Ellipsoid.WGS84.cartesianToCartographic(cameraPositionECEF);
+
+      // calculate forward vector in ENU to get bearing and pitch
+      const forwardECEF = cameraTargetECEF.subtract(cameraPositionECEF).normalize(); // camera forward vector in ECEF
+      const forwardENU = new MathGLVector3(ecefToEnu.transformAsVector(forwardECEF)).normalize(); // camera forward vector in ENU, right handed X=>east, Y=>north, Z=>up,
+      const bearing = toDegrees(TWO_PI - cesiumZeroToTwoPi(Math.atan2(forwardENU.y, forwardENU.x) - PI_OVER_TWO));
+      const pitch = -toDegrees(PI_OVER_TWO - cesiumAcosClamped(forwardENU.z));
 
       const viewport = new FirstPersonViewport({
         longitude,
@@ -304,10 +335,8 @@ export default class TilesetObject {
         }
       }
 
-      const cameraPositionString =
-        glCamPosECEF[0].toFixed(2) + ', ' + glCamPosECEF[1].toFixed(2) + ', ' + glCamPosECEF[2].toFixed(2);
-      const cameraTargetString =
-        glCamTarget[0].toFixed(2) + ', ' + glCamTarget[1].toFixed(2) + ', ' + glCamTarget[2].toFixed(2);
+      const cameraPositionString = cameraPositionECEF[0].toFixed(2) + ', ' + cameraPositionECEF[1].toFixed(2) + ', ' + cameraPositionECEF[2].toFixed(2);
+      const cameraTargetString = cameraPositionECEF[0].toFixed(2) + ', ' + cameraPositionECEF[1].toFixed(2) + ', ' + cameraPositionECEF[2].toFixed(2);
       const stats = {
         camPos: cameraPositionString,
         camTarget: cameraTargetString,
@@ -393,6 +422,62 @@ export default class TilesetObject {
     }
     return new MathGLVector3(v.x, v.z, v.y);
   }
+
+  private calculateTilesetTransforms() {
+    const referenceECEF = this.tileset.cartesianCenter; // reference ECEF
+    return this._calculateTilesetTransforms(referenceECEF);
+  }
+
+  private calculateCartesianModelMatrix(tile: Tile3D): Matrix4 {
+    if (!tile) return null;
+    return this._calculateCartesianModelMatrix(tile.computedTransform, tile.content?.rtcCenter, tile.content?.gltfUpAxis);
+  }
+
+  private _calculateTilesetTransforms(referenceECEF: MathGLVector3) {
+    const globalTransform = Ellipsoid.WGS84.eastNorthUpToFixedFrame(referenceECEF);
+    const ecefToEnu = globalTransform.clone().invert(); // ECEF to ENU Z Up (right handed)
+    const ecefToEnuYUp = this._convertToYup(ecefToEnu); // ECEF to ENU Y Up (and handle handedness)
+    return { ecefToEnu, ecefToEnuYUp }
+  }
+ 
+  private _convertToYup(matrix: Matrix4): Matrix4 {
+    const zUpToYUp = new Matrix4().rotateX(-Math.PI / 2); // turn from Z up to Y up (right handed)
+ 
+    if (this.scene.useRightHandedSystem) {
+      return matrix.clone().multiplyLeft(zUpToYUp);
+    } else {
+      const flipZ = new Matrix4().scale([1, 1, -1]); // needs to happen when left handed
+      return matrix.clone().multiplyLeft(zUpToYUp).multiplyLeft(flipZ);
+    }
+  }
+ 
+  private _calculateCartesianModelMatrix(transform: Matrix4, rtcCenter: MathGLVector3, gltfUpAxis: string): Matrix4 {
+    let cartesianModelMatrix = transform.clone();
+    if (rtcCenter) {
+      cartesianModelMatrix.translate(rtcCenter);
+    }
+    switch (gltfUpAxis) {
+      case 'Y':
+        cartesianModelMatrix = cartesianModelMatrix.multiplyRight(new Matrix4().rotateX(Math.PI / 2)); // for right handed
+        // if (!this.scene.useRightHandedSystem) {
+        //   cartesianModelMatrix = cartesianModelMatrix.multiplyRight(new Matrix4().rotateX(-Math.PI / 2)); // for left handed
+        // }
+        break;
+      case 'X':
+        cartesianModelMatrix = cartesianModelMatrix.multiplyRight(new Matrix4().rotateY(-Math.PI / 2));
+        break;
+      case 'Z':
+      default:
+        // no change
+        break;
+    }
+    if (!this.scene.useRightHandedSystem) {
+      const rotate180 = new Matrix4().rotateX(Math.PI);
+      cartesianModelMatrix = cartesianModelMatrix.multiplyRight(rotate180);
+    }
+    return cartesianModelMatrix;
+  }
+
 }
 
 // HINT! Copy of the cesium zeroToTwoPi function to avoid importing the cesium lib

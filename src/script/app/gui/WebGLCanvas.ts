@@ -99,7 +99,7 @@ export default class WebGLCanvas {
   private async initScene() {
     // Create the scene
     this.scene = new Scene(this.engine);
-    this.scene.useRightHandedSystem = true;
+    // this.scene.useRightHandedSystem = true;
 
     // Performance flags for the scene
     this.scene.skipPointerMovePicking = true; // Do not raise events on pointer move
